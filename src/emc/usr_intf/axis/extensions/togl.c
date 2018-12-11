@@ -55,7 +55,7 @@
 #ifdef USE_LOCAL_TK_H
   #include "tk8.4a3.h"
 #else
-  #include <tk.h>
+  #include <tcl8.5/tk.h>
 #endif
 
 #ifdef WIN32

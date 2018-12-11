@@ -34,7 +34,7 @@
 #endif
 
 #include <tcl.h>
-#include <tk.h>
+#include <tcl8.5/tk.h>
 #include <GL/gl.h>
 #ifdef TOGL_X11
 #include <X11/Xlib.h>
