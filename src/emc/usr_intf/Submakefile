@@ -16,19 +16,15 @@ HALUISRCS := emc/usr_intf/halui.cc
 
 USERSRCS += $(EMCWEBSOCKSRCS)  $(EMCRSHSRCS) $(EMCSCHEDSRCS) $(EMCLCDSRCS) $(USRMOTSRCS) $(HALUISRCS)
 
-ifeq ($(BUILD_GUI), yes)
-	USERSRCS += $(EMCSHSRCS)
-endif
+USERSRCS += $(EMCSHSRCS)
  
 $(call TOOBJSDEPS, $(EMCSHSRCS)) : EXTRAFLAGS = $(ULFLAGS) $(TCL_CFLAGS) -fPIC
  
-ifeq ($(BUILD_GUI), yes)
 ../tcl/linuxcnc.so: $(call TOOBJS, $(EMCSHSRCS)) ../lib/liblinuxcnc.a ../lib/liblinuxcncini.so.0 ../lib/libnml.so.0
 	$(ECHO) Linking $(notdir $@)
 	$(Q)$(CXX) -shared $(LDFLAGS) -o $@ $(ULFLAGS) $(TCL_CFLAGS) $^ $(TCL_LIBS) -lXinerama
 TARGETS += ../tcl/linuxcnc.so
  
-endif
 
 ../bin/linuxcncrsh: $(call TOOBJS, $(EMCRSHSRCS)) ../lib/liblinuxcnc.a ../lib/libnml.so.0 ../lib/liblinuxcncini.so.0
 	$(ECHO) Linking $(notdir $@)

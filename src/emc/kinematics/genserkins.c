@@ -54,6 +54,7 @@ struct haldata {
 } *haldata = 0;
 
 double j[GENSER_MAX_JOINTS];
+double invj[GENSER_MAX_JOINTS];
 
 #define A(i) (*(haldata->a[i]))
 #define ALPHA(i) (*(haldata->alpha[i]))
@@ -84,7 +85,7 @@ int genser_kin_init(void) {
 
     /* set a select few to make it PUMA-like */
     // FIXME-AJ: make a hal pin, also set number of joints based on it
-    genser->link_num = 6;
+    genser->link_num = 3;
 
     return GO_RESULT_OK;
 }
@@ -326,7 +327,7 @@ int kinematicsForward(const double *joint,
     if (changed) {
 	for (i=0; i< 6; i++)
 	    j[i] = joint[i];
-//	rtapi_print("kinematicsForward(joints: %f %f %f %f %f %f)\n", joint[0],joint[1],joint[2],joint[3],joint[4],joint[5]);
+	rtapi_print("kinematicsForward(joints: %f %f %f %f %f %f)\n", joint[0],joint[1],joint[2],joint[3],joint[4],joint[5]);
     }
     // AJ: convert from emc2 coords (XYZABC - which are actually rpy euler
     // angles)
@@ -359,7 +360,7 @@ int kinematicsForward(const double *joint,
     world->c = rpy.y * 180 / PM_PI;
 
     if (changed) {
-//	rtapi_print("kinematicsForward(world: %f %f %f %f %f %f)\n", world->tran.x, world->tran.y, world->tran.z, world->a, world->b, world->c);
+	rtapi_print("kinematicsForward(world: %f %f %f %f %f %f)\n", world->tran.x, world->tran.y, world->tran.z, world->a, world->b, world->c);
     }
     return 0;
 }
@@ -408,10 +409,15 @@ int kinematicsInverse(const EmcPose * world,
     int link;
     int smalls;
     int retval;
-
-//    rtapi_print("kineInverse(joints: %f %f %f %f %f %f)\n", joints[0],joints[1],joints[2],joints[3],joints[4],joints[5]);
-//    rtapi_print("kineInverse(world: %f %f %f %f %f %f)\n", world->tran.x, world->tran.y, world->tran.z, world->a, world->b, world->c);
-
+    int changed = 0;
+    int i;
+	// FIXME - debug hack
+	if (!GO_ROT_CLOSE(invj[0],world->tran.x)) changed = 1;
+	if (!GO_ROT_CLOSE(invj[1],world->tran.y)) changed = 1;
+	if (!GO_ROT_CLOSE(invj[2],world->tran.z)) changed = 1;
+    if (changed) {
+    	rtapi_print("kineInverse(world: %f %f %f %f %f %f)\n", world->tran.x, world->tran.y, world->tran.z, world->a, world->b, world->c);
+    }
 //    genser_kin_init();
     
     // FIXME-AJ: rpy or zyx ?
@@ -511,7 +517,11 @@ int kinematicsInverse(const EmcPose * world,
                 if ((link) && (haldata->unrotate[link]))
                     joints[link] += (haldata->unrotate[link]) * joints[link-1];
 	    }
-//	    rtapi_print("DONEkineInverse(joints: %f %f %f %f %f %f), (iterations=%d)\n", joints[0],joints[1],joints[2],joints[3],joints[4],joints[5], genser->iterations);
+	    if (changed)
+	    rtapi_print("DONEkineInverse(joints: %f %f %f %f %f %f), (iterations=%d)\n", joints[0],joints[1],joints[2],joints[3],joints[4],joints[5], genser->iterations);
+	    invj[0] = world->tran.x;
+	    invj[1] = world->tran.y;
+	    invj[2] = world->tran.z;
 	    return GO_RESULT_OK;
 	}
 	/* else keep iterating */

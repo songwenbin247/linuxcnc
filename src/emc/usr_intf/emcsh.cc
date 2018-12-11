@@ -20,7 +20,7 @@
 #include <signal.h>
 #include <math.h>
 #include <tcl.h>
-#include <tk.h>
+#include <tcl8.5/tk.h>
 
 #include "rcs.hh"
 #include "posemath.h"		// PM_POSE, TO_RAD
